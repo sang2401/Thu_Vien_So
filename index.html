@@ -52,16 +52,76 @@ button:hover{transform:translateY(-2px)}
 }
 .b-go:before{content:"📷  "}
 .quick-title{font-size:18px;font-weight:1000;margin:4px 0 13px;color:#214384}
-#manual{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:780px;margin:0 auto}
-#manual button{
-  min-height:112px;padding:16px 18px;border-radius:24px;border:2px solid transparent;
-  display:flex;align-items:center;justify-content:center;gap:13px;text-align:center;font-size:18px;line-height:1.2;
-  box-shadow:0 8px 18px rgba(61,100,157,.10)
+#manual{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+  max-width:900px;
+  margin:0 auto;
 }
-#manual button:nth-child(1){background:linear-gradient(180deg,#edf8ff,#dff0ff);border-color:#bddcff;color:#1656b6}
-#manual button:nth-child(1):before{content:"🧪";font-size:46px}
-#manual button:nth-child(2){background:linear-gradient(180deg,#f0fff4,#dff5e5);border-color:#bfe7c9;color:#16743d}
-#manual button:nth-child(2):before{content:"💻";font-size:46px}
+#manual button{
+  min-height:132px;
+  padding:18px 22px;
+  border-radius:28px;
+  border:2px solid transparent;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  gap:16px;
+  text-align:left;
+  box-shadow:0 12px 26px rgba(61,100,157,.10);
+  transition:.18s ease;
+}
+#manual button:hover{
+  transform:translateY(-3px);
+  box-shadow:0 16px 30px rgba(61,100,157,.14);
+}
+#manual button:nth-child(1){
+  background:linear-gradient(180deg,#eef7ff,#dceeff);
+  border-color:#bedbff;
+  color:#1656b6;
+}
+#manual button:nth-child(2){
+  background:linear-gradient(180deg,#f1fff5,#e0f5e7);
+  border-color:#bee4c7;
+  color:#16743d;
+}
+.manual-icon{
+  width:68px;height:68px;flex:0 0 68px;
+  border-radius:20px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.72);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.55);
+  font-size:38px;
+}
+.manual-text{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:4px;
+  width:100%;
+}
+.manual-text small{
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.2px;
+  opacity:.85;
+}
+.manual-text strong{
+  font-size:18px;
+  line-height:1.24;
+  font-weight:1000;
+}
+@media(max-width:650px){
+  #manual{grid-template-columns:1fr}
+  #manual button{
+    min-height:116px;
+    padding:16px 18px;
+    border-radius:24px;
+  }
+  .manual-icon{width:60px;height:60px;flex-basis:60px;font-size:34px}
+  .manual-text strong{font-size:17px}
+}
 #cam{display:inline-block;overflow:hidden;border:5px solid #6d83f3;border-radius:22px;background:#fff;box-shadow:var(--shadow)}
 #cam:empty{display:none}
 #cam canvas{display:block;max-width:100%;height:auto}
@@ -116,8 +176,7 @@ button:hover{transform:translateY(-2px)}
   </section>
 
   <section class="panel">
-    <div class="quick-title">Chọn nhanh chương trình để thử</div>
-    <div id="manual"></div>
+        <div id="manual"></div>
   </section>
 
   <div id="cam"></div>
@@ -243,7 +302,18 @@ function beep(ok){
 
 let started=false,camActive=false,model,webcam,mode="idle",book=-1,qi=0,diem=0,streak=0,last=-1,run=0;
 
-$("manual").innerHTML=BOOKS.map((b,i)=>`<button onclick="chonSach(${i})">${b.ten}</button>`).join("");
+$("manual").innerHTML=BOOKS.map((b,i)=>{
+  const icon=i===0?"🧪":"💻";
+  const sub="Chương trình giáo dục";
+  const main=i===0?"STEM":"KĨ NĂNG CÔNG DÂN SỐ";
+  return `<button onclick="chonSach(${i})">
+    <span class="manual-icon">${icon}</span>
+    <span class="manual-text">
+      <small>${sub}</small>
+      <strong>${main}</strong>
+    </span>
+  </button>`;
+}).join("");
 
 async function startCam(){
   const base=$("url").value.trim();
