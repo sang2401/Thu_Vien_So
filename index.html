@@ -264,25 +264,36 @@ async function startCam(){
     requestAnimationFrame(loop);
   }catch(e){say('Lỗi ở bước "'+stage+'": '+((e&&e.message)||e));}
 }
-async function camOn(){
-  // Chỉ setup camera MỘT LẦN. Các lần quét sau dùng lại camera cũ.
-  if(!webcam){
-    webcam=new tmImage.Webcam(320,320,true);
-    await webcam.setup();
-  }
+function setCameraTrackEnabled(on){
   try{
-    if(typeof webcam.play==="function") await webcam.play();
+    const stream = webcam && webcam.webcam && webcam.webcam.srcObject;
+    if(stream){
+      stream.getVideoTracks().forEach(track=>{ track.enabled = on; });
+    }
   }catch(e){}
+}
+async function camOn(){
+  // setup() chỉ chạy đúng 1 lần trong suốt phiên trang.
+  if(!webcam){
+    webcam = new tmImage.Webcam(320,320,true);
+    await webcam.setup();
+    await webcam.play();
+  }else{
+    setCameraTrackEnabled(true);
+    try{
+      if(webcam.webcam && webcam.webcam.paused) await webcam.webcam.play();
+    }catch(e){}
+  }
+
   $("cam").innerHTML="";
   $("cam").appendChild(webcam.canvas);
+  setCameraTrackEnabled(true);
   camActive=true;
 }
 function camOff(){
-  // Không stop() luồng camera vì stop() sẽ khiến trình duyệt xin quyền lại.
-  // Chỉ tạm dừng và ẩn hình camera; lần quét sau sẽ dùng lại luồng cũ.
-  try{
-    if(webcam && typeof webcam.pause==="function") webcam.pause();
-  }catch(e){}
+  // KHÔNG stop(), KHÔNG setup() lại.
+  // Chỉ vô hiệu hóa track để lần quét sau bật lại mà không xin quyền mới.
+  setCameraTrackEnabled(false);
   camActive=false;
   $("cam").innerHTML="";
   $("bar").textContent="";
@@ -313,14 +324,8 @@ async function rescan(){
   run++;stopAudio();book=-1;streak=0;last=-1;
   show("menu",false);show("answers",false);show("back",false);
   if(!started){show("setup",true);mode="idle";say("");return;}
-  try{
-    if(!camActive)await camOn();
-    mode="scan";
-    say("Hãy đưa sách STEM hoặc sách Công dân số vào camera...");
-  }catch(e){
-    mode="idle";
-    say("Không bật được camera: "+((e&&e.message)||e));
-  }
+  try{if(!camActive)await camOn();mode="scan";say("Hãy đưa sách STEM hoặc sách Công dân số vào camera...");}
+  catch(e){mode="idle";say("Không bật được camera: "+((e&&e.message)||e));}
 }
 async function chonSach(i){
   book=i;mode="menu";camOff();
@@ -354,6 +359,15 @@ async function answer(k){
   if(qi<BOOKS[book].q.length){mode="quiz";speakQ();}
   else{show("answers",false);say(`Điểm của bạn: ${diem} / ${BOOKS[book].q.length}`);await new Promise(r=>setTimeout(r,3000));rescan();}
 }
+
+window.addEventListener("pagehide",()=>{
+  try{
+    if(webcam && webcam.webcam && webcam.webcam.srcObject){
+      webcam.webcam.srcObject.getTracks().forEach(t=>t.stop());
+    }
+  }catch(e){}
+});
+
 </script>
 </body>
 </html>
