@@ -254,7 +254,6 @@ async function startCam(){
   try{
     stage="kiểm tra camera";
     if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error("Trình duyệt không cho dùng camera");
-    const st=await navigator.mediaDevices.getUserMedia({video:true});st.getTracks().forEach(t=>t.stop());
     stage="tải thư viện";
     if(typeof tmImage==="undefined"||typeof tf==="undefined")throw new Error("Không tải được thư viện Teachable Machine");
     stage="tải model";say("Đang tải model...");
@@ -266,11 +265,28 @@ async function startCam(){
   }catch(e){say('Lỗi ở bước "'+stage+'": '+((e&&e.message)||e));}
 }
 async function camOn(){
-  webcam=new tmImage.Webcam(320,320,true);
-  await webcam.setup();await webcam.play();
-  $("cam").innerHTML="";$("cam").appendChild(webcam.canvas);camActive=true;
+  // Chỉ setup camera MỘT LẦN. Các lần quét sau dùng lại camera cũ.
+  if(!webcam){
+    webcam=new tmImage.Webcam(320,320,true);
+    await webcam.setup();
+  }
+  try{
+    if(typeof webcam.play==="function") await webcam.play();
+  }catch(e){}
+  $("cam").innerHTML="";
+  $("cam").appendChild(webcam.canvas);
+  camActive=true;
 }
-function camOff(){try{if(webcam)webcam.stop();}catch(e){}camActive=false;$("cam").innerHTML="";$("bar").textContent="";}
+function camOff(){
+  // Không stop() luồng camera vì stop() sẽ khiến trình duyệt xin quyền lại.
+  // Chỉ tạm dừng và ẩn hình camera; lần quét sau sẽ dùng lại luồng cũ.
+  try{
+    if(webcam && typeof webcam.pause==="function") webcam.pause();
+  }catch(e){}
+  camActive=false;
+  $("cam").innerHTML="";
+  $("bar").textContent="";
+}
 async function loop(){
   if(mode==="scan"&&camActive){
     webcam.update();
@@ -297,8 +313,14 @@ async function rescan(){
   run++;stopAudio();book=-1;streak=0;last=-1;
   show("menu",false);show("answers",false);show("back",false);
   if(!started){show("setup",true);mode="idle";say("");return;}
-  try{if(!camActive)await camOn();mode="scan";say("Hãy đưa sách STEM hoặc sách Công dân số vào camera...");}
-  catch(e){mode="idle";say("Không bật được camera: "+((e&&e.message)||e));}
+  try{
+    if(!camActive)await camOn();
+    mode="scan";
+    say("Hãy đưa sách STEM hoặc sách Công dân số vào camera...");
+  }catch(e){
+    mode="idle";
+    say("Không bật được camera: "+((e&&e.message)||e));
+  }
 }
 async function chonSach(i){
   book=i;mode="menu";camOff();
