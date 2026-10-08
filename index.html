@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Góc đọc sách thông minh - STEM & Công dân số</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --ink:#173a78;--muted:#697da8;--blue:#1d82ff;--blue2:#0f5bd8;
+  --green:#29b765;--orange:#ff941f;--purple:#7a57e8;
+  --card:#fff;--line:#dce9f8;--shadow:0 12px 30px rgba(48,91,164,.14);
+}
+html,body{min-height:100%}
+body{
+  margin:0;font-family:"Segoe UI",Arial,sans-serif;color:var(--ink);text-align:center;
+  background:
+    radial-gradient(circle at 7% 92%,rgba(51,183,96,.12) 0 150px,transparent 151px),
+    radial-gradient(circle at 94% 91%,rgba(51,139,255,.12) 0 170px,transparent 171px),
+    linear-gradient(180deg,#eff8ff 0%,#fffdf8 48%,#f4f9ff 100%);
+}
+header{
+  position:relative;overflow:hidden;padding:24px 20px 28px;color:#fff;
+  background:linear-gradient(110deg,#24a7ff 0%,#257cf5 55%,#6a5be8 100%);
+  border-radius:0 0 34px 34px;box-shadow:0 10px 26px rgba(43,102,202,.22);
+}
+header:before{content:"📚";position:absolute;left:6%;top:14px;font-size:72px;opacity:.28;transform:rotate(-8deg)}
+header:after{content:"🤖";position:absolute;right:7%;bottom:-4px;font-size:82px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.12))}
+.hero-title{font-size:clamp(30px,4vw,54px);font-weight:1000;letter-spacing:.4px}
+.hero-sub{margin-top:7px;font-size:clamp(14px,1.4vw,20px);font-weight:700;color:#ebf5ff}
+main{max-width:1020px;margin:0 auto;padding:22px 14px 50px}
+.panel{
+  background:rgba(255,255,255,.94);border:1px solid rgba(145,170,214,.28);
+  border-radius:26px;box-shadow:var(--shadow);padding:20px;margin-bottom:18px;
+}
+.model-title{display:flex;justify-content:center;align-items:center;gap:10px;font-size:21px;font-weight:1000}
+.round-icon{
+  width:48px;height:48px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  background:#edf5ff;border:2px solid #d7e8ff;font-size:25px
+}
+.model-hint{color:var(--muted);font-size:14px;font-weight:700;margin:4px 0 12px}
+input{
+  width:min(100%,850px);height:56px;padding:12px 17px;border:2px solid #d7e4f4;border-radius:16px;
+  font-size:16px;outline:none;color:#23416d;background:#fff
+}
+input:focus{border-color:#76a6ff;box-shadow:0 0 0 4px rgba(118,166,255,.14)}
+button{border:0;cursor:pointer;font-family:inherit;font-weight:1000;transition:.15s}
+button:hover{transform:translateY(-2px)}
+.b-go{
+  margin-top:12px;min-width:340px;min-height:58px;padding:12px 24px;border-radius:18px;color:#fff;font-size:18px;
+  background:linear-gradient(135deg,#32a7ff,#176af0);box-shadow:0 8px 18px rgba(31,110,232,.24)
+}
+.b-go:before{content:"📷  "}
+.quick-title{font-size:18px;font-weight:1000;margin:4px 0 13px;color:#214384}
+#manual{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:780px;margin:0 auto}
+#manual button{
+  min-height:112px;padding:16px 18px;border-radius:24px;border:2px solid transparent;
+  display:flex;align-items:center;justify-content:center;gap:13px;text-align:center;font-size:18px;line-height:1.2;
+  box-shadow:0 8px 18px rgba(61,100,157,.10)
+}
+#manual button:nth-child(1){background:linear-gradient(180deg,#edf8ff,#dff0ff);border-color:#bddcff;color:#1656b6}
+#manual button:nth-child(1):before{content:"🧪";font-size:46px}
+#manual button:nth-child(2){background:linear-gradient(180deg,#f0fff4,#dff5e5);border-color:#bfe7c9;color:#16743d}
+#manual button:nth-child(2):before{content:"💻";font-size:46px}
+#cam{display:inline-block;overflow:hidden;border:5px solid #6d83f3;border-radius:22px;background:#fff;box-shadow:var(--shadow)}
+#cam:empty{display:none}
+#cam canvas{display:block;max-width:100%;height:auto}
+#bar{margin:10px 0 2px;color:#5e6f94;font-size:14px;font-weight:800}
+#dbg{max-width:880px;margin:8px auto 0;min-height:0!important;color:#c63737!important;font-size:14px!important;font-weight:800}
+#dbg:not(:empty){padding:10px 14px;background:#fff1f1;border:1px solid #ffd0d0;border-radius:14px}
+#msg{
+  max-width:880px;margin:15px auto;padding:16px 18px;background:#fff;border:1px solid #e2eaf5;
+  border-radius:22px;box-shadow:0 7px 18px rgba(69,96,154,.08);font-size:20px;font-weight:900;line-height:1.5;white-space:pre-line
+}
+#msg:empty{display:none}
+#menu:not(.hide),#answers:not(.hide){
+  max-width:880px;margin:0 auto;padding:15px;background:#fff;border:1px solid #e3eaf5;border-radius:22px;box-shadow:var(--shadow)
+}
+#menu:not(.hide):before{content:"📖 Chọn chức năng";display:block;margin-bottom:10px;font-size:18px;font-weight:1000}
+.b-q,.b-s,.b-r,.b-a{min-height:55px;padding:11px 22px;margin:6px;border-radius:17px;color:#fff;font-size:17px}
+.b-q{min-width:230px;background:linear-gradient(135deg,#ffc04d,#ff8d15)}
+.b-q:before{content:"❓  "}
+.b-s{min-width:230px;background:linear-gradient(135deg,#55d77a,#16ae56)}
+.b-s:before{content:"📄  "}
+.b-r{background:linear-gradient(135deg,#ff7484,#ef3f5d)}
+.b-r:before{content:"↩  "}
+.b-a{min-width:108px;background:linear-gradient(135deg,#9d7dff,#7451e7)}
+.ans{display:block;margin-top:10px;padding:13px 16px;text-align:left;border:1px solid #dfebf8;border-radius:17px;background:#f7fbff;font-size:17px;font-weight:750}
+.ans div{padding:5px 0}
+.note{
+  margin:18px auto 0;max-width:880px;padding:13px 16px;border-radius:18px;
+  background:#fff8dd;border:1px solid #f2dc8b;color:#6f5818;font-size:14px;font-weight:800
+}
+.hide{display:none!important}
+@media(max-width:650px){
+  header:before,header:after{font-size:48px}
+  #manual{grid-template-columns:1fr}
+  .b-go,.b-q,.b-s{min-width:min(92%,320px)}
+  #manual button{min-height:96px;font-size:16px}
+  #msg{font-size:17px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hero-title">📖 GÓC ĐỌC SÁCH THÔNG MINH</div>
+  <div class="hero-sub">Nhận diện 2 chương trình: Giáo dục STEM và Kĩ năng Công dân số</div>
+</header>
+
+<main>
+  <section id="setup" class="panel">
+    <div class="model-title"><span class="round-icon">🔗</span><span>Dán link model Teachable Machine</span></div>
+    <div class="model-hint">Dạng: https://teachablemachine.withgoogle.com/models/xxxx/</div>
+    <input id="url" placeholder="🔗 Link model">
+    <div><button class="b-go" onclick="startCam()">Bật camera & nhận diện</button></div>
+  </section>
+
+  <section class="panel">
+    <div class="quick-title">Chọn nhanh chương trình để thử</div>
+    <div id="manual"></div>
+  </section>
+
+  <div id="cam"></div>
+  <div id="bar"></div>
+  <div id="dbg"></div>
+  <div id="msg"></div>
+
+  <div id="menu" class="hide">
+    <button class="b-q" onclick="startQuiz()">CÂU HỎI</button>
+    <button class="b-s" onclick="doSummary()">TÓM TẮT</button>
+    <div><button class="b-r" onclick="rescan()">QUÉT SÁCH KHÁC</button></div>
+  </div>
+
+  <div><button id="back" class="b-r hide" onclick="backToMenu()">QUAY LẠI</button></div>
+
+  <div id="answers" class="hide">
+    <button class="b-a" onclick="answer(0)">A</button>
+    <button class="b-a" onclick="answer(1)">B</button>
+    <button class="b-a" onclick="answer(2)">C</button>
+    <button class="b-r" onclick="backToMenu()">QUAY LẠI</button>
+  </div>
+
+  <div class="note">Model nên có 3 class: <b>stem</b>, <b>cong_dan_so</b>, <b>khong_co_sach</b>.</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+<script>
+const BOOKS = [
+ {
+   id:"stem",
+   ten:"CHƯƠNG TRÌNH GIÁO DỤC STEM",
+   kw:["stem","giao duc stem","giáo dục stem"],
+   tomtat:"Chương trình Giáo dục STEM là phương pháp học tích hợp Khoa học, Công nghệ, Kĩ thuật và Toán học, giúp học sinh vận dụng kiến thức vào thực tế thông qua các dự án, thí nghiệm và hoạt động trải nghiệm. Qua chương trình, học sinh được rèn luyện tư duy phản biện, tư duy logic, khả năng giải quyết vấn đề, sáng tạo, làm việc nhóm, giao tiếp, quan sát và khám phá khoa học. Nội dung được xây dựng từ lớp 1 đến lớp 5 theo mức độ tăng dần, từ các dự án đơn giản như nam châm, chậu cây tự tưới, mạch điện, mô hình cơ khí đến lập trình robot, cảm biến, năng lượng mặt trời, điện gió và Lego WeDo. Qua đó, STEM giúp học sinh phát triển các kĩ năng thế kỉ 21, tăng hứng thú học tập và bước đầu định hướng nghề nghiệp trong các lĩnh vực khoa học, công nghệ và kĩ thuật.",
+   q:[
+     ["Giáo dục STEM tích hợp những lĩnh vực nào?","Khoa học, Công nghệ, Kĩ thuật và Toán học","Văn học, Lịch sử, Âm nhạc và Mĩ thuật","Thể dục, Đạo đức, Tin học và Ngoại ngữ",0],
+     ["Một trong những mục tiêu quan trọng của giáo dục STEM là gì?","Giúp học sinh chỉ ghi nhớ lí thuyết","Giúp học sinh vận dụng kiến thức để giải quyết vấn đề thực tiễn","Giúp học sinh học riêng từng môn không liên quan đến nhau",1],
+     ["Học sinh học STEM chủ yếu thông qua hình thức nào?","Chỉ nghe giảng và chép bài","Học thuộc lòng kiến thức","Dự án, thực hành và trải nghiệm thực tế",2],
+     ["Việc học STEM từ sớm giúp học sinh hình thành điều gì?","Sự tò mò, tư duy logic và khả năng sáng tạo","Thói quen chỉ học thuộc lòng","Chỉ tập trung vào một môn học duy nhất",0],
+     ["Chương trình STEM giúp học sinh phát triển những kĩ năng nào?","Tư duy phản biện, sáng tạo, giải quyết vấn đề và hợp tác","Chỉ kĩ năng ghi nhớ","Chỉ kĩ năng tính toán",0]
+   ],
+   audioTomtat:"stem_tomtat.mp3",
+   audioQ:["stem_cau1.mp3","stem_cau2.mp3","stem_cau3.mp3","stem_cau4.mp3","stem_cau5.mp3"]
+ },
+ {
+   id:"cds",
+   ten:"CHƯƠNG TRÌNH GIÁO DỤC KĨ NĂNG CÔNG DÂN SỐ",
+   kw:["cong dan so","cong_dan_so","congdanso","cds","kncds","ki nang cong dan so","ky nang cong dan so"],
+   tomtat:"Chương trình Giáo dục Kĩ năng công dân số giúp học sinh tiểu học hình thành khả năng sử dụng thiết bị và công nghệ số một cách an toàn, chủ động, có trách nhiệm và hiệu quả. Thông qua các hoạt động thực hành với máy tính bảng, Internet, AI, Canva, Scratch, Google Maps, Google Earth và các công cụ trực tuyến, học sinh được rèn luyện kĩ năng tìm kiếm và xử lí thông tin, giao tiếp – hợp tác, sáng tạo sản phẩm số, bảo vệ tài khoản và thiết bị, nhận diện thông tin sai lệch hoặc độc hại, tôn trọng bản quyền và giải quyết các vấn đề trong môi trường số. Nội dung chương trình được xây dựng từ cơ bản đến nâng cao theo từng khối lớp 1–5, đồng thời giúp học sinh phát triển tư duy phản biện, sáng tạo, khả năng tự học và bước đầu định hướng các nghề nghiệp gắn với công nghệ trong tương lai.",
+   q:[
+     ["Kĩ năng công dân số giúp học sinh làm gì trong môi trường số?","Sử dụng công nghệ an toàn, chủ động và có trách nhiệm","Chỉ dùng thiết bị để giải trí","Tránh hoàn toàn việc sử dụng Internet",0],
+     ["Một trong những năng lực quan trọng của công dân số là gì?","An toàn kĩ thuật số","Chỉ học thuộc lòng","Chỉ sử dụng sách giấy",0],
+     ["Vì sao học sinh tiểu học cần học kĩ năng công dân số?","Để biết sử dụng công nghệ đúng cách và tránh các rủi ro trực tuyến","Để sử dụng thiết bị số nhiều thời gian hơn","Để không cần sự hướng dẫn của người lớn",0],
+     ["Học sinh được tiếp cận với những công nghệ và công cụ nào trong chương trình?","AI, Scratch, Canva và các công cụ trực tuyến","Chỉ máy tính cầm tay","Chỉ sách giáo khoa điện tử",0],
+     ["Chương trình Kĩ năng công dân số giúp học sinh phát triển những kĩ năng nào?","Tư duy phản biện, sáng tạo, giải quyết vấn đề và học tập suốt đời","Chỉ kĩ năng ghi nhớ","Chỉ kĩ năng sử dụng bàn phím",0]
+   ],
+   audioTomtat:"cds_tomtat.mp3",
+   audioQ:["cds_cau1.mp3","cds_cau2.mp3","cds_cau3.mp3","cds_cau4.mp3","cds_cau5.mp3"]
+ }
+];
+
+const NGUONG = 0.9;
+const SO_KHUNG = 8;
+const KHONG_SACH_KW=["khong_co_sach","khong co sach","khongcosach","no_book","no book","none","empty"];
+
+let ac=null;
+const player=new Audio();
+player.preload="auto";
+player.setAttribute("playsinline","");
+let oscs=[],unlocked=false;
+
+const $=id=>document.getElementById(id);
+const show=(id,on)=>$(id).classList.toggle("hide",!on);
+const say=t=>{$("msg").textContent=t||"";};
+const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").toLowerCase();
+const isNoBook=name=>KHONG_SACH_KW.some(k=>norm(name).includes(norm(k)));
+const idxFromClass=name=>BOOKS.findIndex(b=>b.kw.some(k=>norm(name).includes(norm(k))));
+const displayLabel=name=>{
+  if(isNoBook(name)) return "KHÔNG CÓ SÁCH";
+  const i=idxFromClass(name);
+  return i>=0?BOOKS[i].ten:"ĐANG QUÉT";
+};
+
+function dbg(t){$("dbg").textContent=t||"";}
+function unlockAudio(){
+  if(unlocked)return; unlocked=true;
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==="suspended")ac.resume();}catch(e){}
+  player.muted=true;
+  player.src="audio/stem_cau1.mp3?v=1";
+  player.play().then(()=>{player.pause();player.muted=false;}).catch(()=>{player.muted=false;});
+}
+["pointerdown","touchstart","click"].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true}));
+function stopAudio(){try{player.pause();}catch(e){} oscs.forEach(o=>{try{o.stop();}catch(e){}});oscs=[];}
+function play(src){
+  stopAudio();
+  if(!src)return Promise.resolve();
+  let u=src;
+  if(!/^https?:\/\//i.test(u)&&!u.startsWith("audio/"))u="audio/"+u;
+  u+=(u.includes("?")?"&":"?")+"v=20261008";
+  return new Promise(res=>{
+    player.muted=false; player.onended=res;
+    player.onerror=()=>{dbg("Không tải được file "+u+". Kiểm tra thư mục audio.");res();};
+    player.src=u;
+    const p=player.play();
+    if(p&&p.then)p.then(()=>dbg("")).catch(e=>{dbg("Không phát được audio: "+(e.message||e));res();});
+  });
+}
+function beep(ok){
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    if(ac.state==="suspended")ac.resume();
+    const notes=ok?[[660,0],[880,.15]]:[[220,0],[160,.18]];
+    notes.forEach(([f,t])=>{
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type=ok?"sine":"square";o.frequency.value=f;
+      g.gain.setValueAtTime(.2,ac.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+.25);
+      o.connect(g);g.connect(ac.destination);oscs.push(o);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+.26);
+    });
+  }catch(e){}
+  return new Promise(r=>setTimeout(r,700));
+}
+
+let started=false,camActive=false,model,webcam,mode="idle",book=-1,qi=0,diem=0,streak=0,last=-1,run=0;
+
+$("manual").innerHTML=BOOKS.map((b,i)=>`<button onclick="chonSach(${i})">${b.ten}</button>`).join("");
+
+async function startCam(){
+  const base=$("url").value.trim();
+  if(!base){say("Hãy dán link model trước.");return;}
+  const url=base.endsWith("/")?base:base+"/";
+  show("menu",false);show("answers",false);show("back",false);
+  let stage="";
+  try{
+    stage="kiểm tra camera";
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error("Trình duyệt không cho dùng camera");
+    const st=await navigator.mediaDevices.getUserMedia({video:true});st.getTracks().forEach(t=>t.stop());
+    stage="tải thư viện";
+    if(typeof tmImage==="undefined"||typeof tf==="undefined")throw new Error("Không tải được thư viện Teachable Machine");
+    stage="tải model";say("Đang tải model...");
+    const cb="?v="+Date.now();
+    model=await tmImage.load(url+"model.json"+cb,url+"metadata.json"+cb);
+    stage="bật camera";await camOn();
+    show("setup",false);started=true;mode="scan";say("Hãy đưa sách STEM hoặc sách Công dân số vào camera...");
+    requestAnimationFrame(loop);
+  }catch(e){say('Lỗi ở bước "'+stage+'": '+((e&&e.message)||e));}
+}
+async function camOn(){
+  webcam=new tmImage.Webcam(320,320,true);
+  await webcam.setup();await webcam.play();
+  $("cam").innerHTML="";$("cam").appendChild(webcam.canvas);camActive=true;
+}
+function camOff(){try{if(webcam)webcam.stop();}catch(e){}camActive=false;$("cam").innerHTML="";$("bar").textContent="";}
+async function loop(){
+  if(mode==="scan"&&camActive){
+    webcam.update();
+    const p=await model.predict(webcam.canvas);
+    if(mode==="scan"){
+      const best=p.reduce((a,b)=>b.probability>a.probability?b:a);
+      const idx=idxFromClass(best.className);
+      const noBook=isNoBook(best.className);
+      $("bar").textContent=`${displayLabel(best.className)}: ${(best.probability*100).toFixed(0)}%`;
+      if(noBook&&best.probability>=NGUONG){
+        streak=0;last=-1;show("menu",false);show("answers",false);show("back",false);
+        say("Chưa phát hiện sách. Camera đang tiếp tục quét...");
+      }else if(idx>=0&&best.probability>=NGUONG){
+        streak=(idx===last)?streak+1:1;last=idx;
+        if(streak>=SO_KHUNG)chonSach(idx);
+      }else{
+        streak=0;last=-1;say("Đang quét... Hãy đưa đúng bìa sách vào camera.");
+      }
+    }
+  }
+  requestAnimationFrame(loop);
+}
+async function rescan(){
+  run++;stopAudio();book=-1;streak=0;last=-1;
+  show("menu",false);show("answers",false);show("back",false);
+  if(!started){show("setup",true);mode="idle";say("");return;}
+  try{if(!camActive)await camOn();mode="scan";say("Hãy đưa sách STEM hoặc sách Công dân số vào camera...");}
+  catch(e){mode="idle";say("Không bật được camera: "+((e&&e.message)||e));}
+}
+async function chonSach(i){
+  book=i;mode="menu";camOff();
+  show("menu",true);show("answers",false);show("back",false);
+  say("Đã nhận ra: "+BOOKS[i].ten+"\nChọn CÂU HỎI hoặc TÓM TẮT");
+}
+function backToMenu(){
+  run++;stopAudio();mode="menu";show("answers",false);show("back",false);show("menu",true);
+  say("Đã nhận ra: "+BOOKS[book].ten+"\nChọn CÂU HỎI hoặc TÓM TẮT");
+}
+async function doSummary(){
+  run++;show("menu",false);show("back",true);
+  say("Tóm tắt: "+BOOKS[book].ten+"\n"+BOOKS[book].tomtat);
+  await play(BOOKS[book].audioTomtat);
+}
+function startQuiz(){run++;qi=0;diem=0;mode="quiz";show("menu",false);show("answers",true);speakQ();}
+function showQ(){
+  const q=BOOKS[book].q[qi],m=$("msg");m.innerHTML="";
+  const h=document.createElement("div");h.textContent=`Câu ${qi+1}: ${q[0]}`;
+  const box=document.createElement("div");box.className="ans";
+  ["A","B","C"].forEach((L,i)=>{const d=document.createElement("div");d.textContent=`Đáp án ${L}: ${q[i+1]}`;box.appendChild(d);});
+  m.appendChild(h);m.appendChild(box);
+}
+async function speakQ(){showQ();await play(BOOKS[book].audioQ[qi]);}
+async function answer(k){
+  if(mode!=="quiz")return;
+  mode="wait";const q=BOOKS[book].q[qi],L="ABC"[q[4]];
+  if(k===q[4]){diem++;stopAudio();say("QUÁ ĐÚNG! 🎉");await beep(true);}
+  else{stopAudio();say("SAI RỒI! Đáp án là "+L);await beep(false);}
+  qi++;
+  if(qi<BOOKS[book].q.length){mode="quiz";speakQ();}
+  else{show("answers",false);say(`Điểm của bạn: ${diem} / ${BOOKS[book].q.length}`);await new Promise(r=>setTimeout(r,3000));rescan();}
+}
+</script>
+</body>
+</html>
